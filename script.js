@@ -12,6 +12,9 @@ class Workout {
   // built-in class/constructor function that has useful properties and methods.
 
   // the constructor function is a function that gets called once a new object is created from this class with the "new" keyword with the "this" keyword set to the newly created object
+
+  clicks = 0;
+
   constructor(coords, distance, duration) {
     this.coords = coords; // [lat, lng]
     this.distance = distance; // in km
@@ -40,6 +43,10 @@ class Workout {
     } ${this.date.getDate()}`;
   }
  
+  // This method was to show that objects retrieved from localStorae will lose their prototype chain 
+  // click() {
+  //   this.clicks++;
+  // }
 }
 
 // const workout1 = new Workout([12, 13], 14, 15);
@@ -100,11 +107,18 @@ const inputElevation = document.querySelector(".form__input--elevation");
 
 class App {
   #map;
+  #mapZoomLevel = 13;
   #mapEvent;
   #workouts = [];
 
   constructor() {
+    // Get user's position
     this._getPosition();
+
+    // Get data from local storage
+    this._getLocalStorage();
+
+    // Attach event handlers
 
     // The "this" keyword inside an event listener callback function is set to the DOM element onto which it is attached
 
@@ -148,7 +162,7 @@ class App {
     const { longitude } = position.coords;
     const coords = [latitude, longitude];
 
-    this.#map = L.map("map").setView(coords, 13);
+    this.#map = L.map("map").setView(coords, this.#mapZoomLevel);
 
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       attribution:
@@ -159,6 +173,10 @@ class App {
 
     // Handling clicks on map
     this.#map.on("click", this._showForm.bind(this));
+
+    this.#workouts.forEach((work) => {
+      this._renderWorkoutMarker(work);
+    });
   }
 
   _showForm(mapE) {
@@ -230,6 +248,8 @@ class App {
     this._renderWorkout(workout);
     // Hide the form + clear input fields
     this._hideForm();
+    // Set local storage to all workouts
+    this._setLocalStorage();
   }
 
   _renderWorkoutMarker(workout) {
@@ -311,6 +331,43 @@ class App {
     const workout = this.#workouts.find(
       (work) => work.id === workoutEl.dataset.id
     );
+
+    this.#map.setView(workout.coords, this.#mapZoomLevel),
+      {
+        animate: true,
+        pan: {
+          duration: 1,
+        },
+      };
+
+    // using the public interface
+    // workout.click();
+    // console.log(workout);
+  }
+
+  // we shouldn't use local storage to store large amounts of data because that will slow down the application
+
+  _setLocalStorage() {
+    localStorage.setItem("workout", JSON.stringify(this.#workouts));
+  }
+
+  _getLocalStorage() {
+    const data = JSON.parse(localStorage.getItem("workout"));
+
+    if (!data) return;
+
+    this.#workouts = data;
+
+    this.#workouts.forEach((work) => {
+      this._renderWorkout(work);
+    });
+  }
+
+  reset() {
+    localStorage.removeItem("workout");
+
+    // location is a big object that contains a lot of methods and properties regarding the browser
+    location.reload();
   }
 }
 
