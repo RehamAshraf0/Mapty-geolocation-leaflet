@@ -111,6 +111,8 @@ class App {
     form.addEventListener("submit", this._newWorkout.bind(this));
 
     inputType.addEventListener("change", this._toggleElevationField);
+
+    containerWorkouts.addEventListener("click", this._moveToPopup.bind(this));
   }
 
   _getPosition() {
@@ -173,9 +175,10 @@ class App {
       inputElevation.value =
         "";
 
-    // form.style.display = "none";
+    form.style.display = "none";
     form.classList.add("hidden");
-    // setTimeout(() => ((form.style.display = "grid"), 1000));
+    // setTimeout() calls the callback function after a certain amount of time
+    setTimeout(() => ((form.style.display = "grid"), 1000));
   }
 
   _toggleElevationField() {
@@ -297,6 +300,17 @@ class App {
   </li>`;
     }
     form.insertAdjacentHTML("afterend", html);
+  }
+
+  _moveToPopup(e) {
+    const workoutEl = e.target.closest(".workout");
+
+    // guard clause
+    if (!workoutEl) return;
+
+    const workout = this.#workouts.find(
+      (work) => work.id === workoutEl.dataset.id
+    );
   }
 }
 
