@@ -51,7 +51,7 @@ class Workout {
 
 // const workout1 = new Workout([12, 13], 14, 15);
 // const workout2 = new Workout([22, 24], 124, 215);
-// console.log(workout1, workout2);
+// console.log(workout1, workout2);..
 
 class Running extends Workout {
   type = "running";
